@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:sign_in_button/sign_in_button.dart';
 import 'package:taskproject/projects/signup.dart';
 
 class LoginPage extends StatefulWidget {
@@ -17,6 +18,17 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _email=TextEditingController();
   final TextEditingController _pass=TextEditingController();
 
+  final FirebaseAuth _auth=FirebaseAuth.instance;
+  User? _user;
+  void initState(){
+    super.initState();
+    _auth.authStateChanges().listen((event) {
+      setState(() {
+        _user=event;
+
+      });
+    });
+  }
   signInWithEmailAndPassword() async {
     try {
       setState(() {
@@ -87,6 +99,7 @@ class _LoginPageState extends State<LoginPage> {
                   },
                   decoration: const InputDecoration(hintText: "Enter Password"),
                 ),
+
                 SizedBox(
                   width: double.infinity,
                   height: 45,
@@ -113,13 +126,42 @@ class _LoginPageState extends State<LoginPage> {
                           widget.onPressed?.call();
                         }
                         , child: Text('Signup')),
+
                   ],
                 ),
+                SizedBox(height: 2,),
+                _user!=null ? _userInfo():_goggleSignInButton()
+
               ],
             ),
           ),
         ),
       ),
     );
+  }
+  Widget _goggleSignInButton(){
+    return Center(
+      child: SizedBox(
+        height: 20,
+        child: SignInButton(
+          Buttons.google,
+          text: "Sign Up with Google",
+          onPressed: (){
+            _handleGoogleSignIn();
+          },
+        ),
+      ),
+    );
+  }
+  Widget _userInfo(){
+    return SizedBox();
+  }
+  void _handleGoogleSignIn(){
+    try{
+      GoogleAuthProvider _googleAuthProvider = GoogleAuthProvider();
+      _auth.signInWithProvider(_googleAuthProvider);
+    }catch(error){
+      print("error in google Signin $error" );
+    }
   }
 }
